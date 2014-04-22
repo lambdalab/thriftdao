@@ -1,0 +1,19 @@
+bin
+gen
+.*
+build
+src/gen
+out
+classes
+*.iws
+*.iml
+*.ipr
+checksum
+target
+
+*.class
+*.log
+*.pyc
+
+// backup files
+*~

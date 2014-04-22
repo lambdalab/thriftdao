@@ -1,0 +1,45 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:0.5"
+        classpath "org.scala-lang:scala-library:${scalaVersion}"
+        classpath "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
+    }
+}
+
+apply {
+    plugin "scrooge-gradle-plugin"
+    plugin "scala"
+    plugin "eclipse"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+dependencies {
+    compile "com.foursquare:common-thrift-bson:1.5.0"
+    compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
+    compile "org.mongodb:casbah_${scalaLevel}:2.7.0"
+    compile "org.scala-lang:scala-reflect:${scalaVersion}"
+
+    testCompile "junit:junit:4.11"
+    testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
+}
+
+sourceSets.main.java.srcDirs = ["src/ext/spindle"]
+
+sourceSets.test.scala.srcDirs += ["gen/test/scala"]
+
+// TODO refactor the scrooge generator
+compileScrooge {
+    thriftFiles = fileTree(dir: "src/test/thrift", include: "**/*.thrift")
+    dest = file("gen/test/scala")
+}
+tasks.compileTestScala.dependsOn(compileScrooge)
