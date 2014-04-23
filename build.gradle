@@ -1,3 +1,13 @@
+if (!hasProperty('scalaVersion')) {
+    scalaVersion = '2.10.4'
+}
+def (major, minor, trivial) = scalaVersion.tokenize('.')
+scalaLevel = major + "." + minor
+
+if (!hasProperty('scroogeVersion')) {
+    scroogeVersion = '3.13.2'
+}
+
 buildscript {
     repositories {
         mavenCentral()
@@ -18,9 +28,6 @@ apply {
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots"
-    }
 }
 
 dependencies {
