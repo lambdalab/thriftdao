@@ -27,10 +27,6 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] {
   
   def store(obj: T): Unit = {
     val dbo = serializer.toDBObject(obj)
-    for (a <- dbo) {
-      print(a._1 + "->" + a._2 + " ")
-    }
-    println
     if (primaryKey.size > 0) {
       val keyDbo = fieldsToDbo(fields, f => dbo(f.id.toString))
       coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
