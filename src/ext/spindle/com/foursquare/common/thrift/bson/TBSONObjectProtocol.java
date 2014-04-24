@@ -2,27 +2,21 @@
 
 package com.foursquare.common.thrift.bson;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.ByteBuffer;
-import java.util.Date;
-
 import com.foursquare.common.thrift.base.EnhancedTField;
 import com.foursquare.common.thrift.base.TDummyTransport;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.apache.thrift.TBaseHelper;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TField;
-import org.apache.thrift.protocol.TList;
-import org.apache.thrift.protocol.TMap;
-import org.apache.thrift.protocol.TMessage;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.protocol.TSet;
-import org.apache.thrift.protocol.TStruct;
+import org.apache.thrift.protocol.*;
 import org.apache.thrift.transport.TTransport;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 import org.bson.types.ObjectId;
+
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.util.Date;
 
 
 /**
@@ -140,11 +134,19 @@ public class TBSONObjectProtocol extends TProtocol {
   private static final TStruct ANONYMOUS_STRUCT = new TStruct();
 
   // Exactly one of these is set at any one time, depending on which factory was used to create this instance.
-  private BSONWriteState writeState = null;
-  private BSONReadState readState = null;
+  protected BSONWriteState writeState = null;
+  protected BSONReadState readState = null;
+
+  public void setWriteState(BSONWriteState writeState) {
+    this.writeState = writeState;
+  }
+
+  public void setReadState(BSONReadState readState) {
+    this.readState = readState;
+  }
 
   // If writing a field, the value, if any, of the "enhanced_type" annotation on that field. Unused otherwise.
-  private String enhancedType = null;
+  protected String enhancedType = null;
 
   protected TBSONObjectProtocol() {
     super(new TDummyTransport());
@@ -159,7 +161,7 @@ public class TBSONObjectProtocol extends TProtocol {
    * Set the source object to read from.
    *
    * @param srcObject Read from this object.
-   * @throws TException if this object was not created for reading, or if we're in the middle of reading.
+   * @throws org.apache.thrift.TException if this object was not created for reading, or if we're in the middle of reading.
    */
   public void setSource(BSONObject srcObject) throws TException {
     if (readState == null) {
@@ -171,7 +173,7 @@ public class TBSONObjectProtocol extends TProtocol {
   /**
    * Get the object we've written to.
    * @return The result of writing to a BSONObject.
-   * @throws TException if this object was not created for writing, or if we're in the middle of writing.
+   * @throws org.apache.thrift.TException if this object was not created for writing, or if we're in the middle of writing.
    */
   public BSONObject getOutput() throws TException {
     if (writeState == null) {
@@ -235,8 +237,7 @@ public class TBSONObjectProtocol extends TProtocol {
 
   @Override
   public void writeFieldBegin(TField tField) throws TException {
-    // TODO(fuyaoz): merge upstream
-    writeState.putValue(Short.toString(tField.id));
+    writeState.putValue(tField.name);
     if (tField instanceof EnhancedTField) {
       enhancedType = ((EnhancedTField)tField).enhancedTypes.get("bson");
     }
@@ -292,7 +293,7 @@ public class TBSONObjectProtocol extends TProtocol {
 
   @Override
   public void writeI16(short i) throws TException {
-    writeState.putValue((int)i);  // BSON has no native byte type, so we use an int32.
+    writeState.putValue((int)i);  // BSON has no native short type, so we use an int32.
   }
 
   @Override
@@ -459,7 +460,19 @@ public class TBSONObjectProtocol extends TProtocol {
   @Override
   public String readString() throws TException {
     try {
-      return (String)readState.getNextItem();
+      Object item = readState.getNextItem();
+      if (item instanceof String) {
+        return (String)item;
+      } else if (item instanceof byte[]) {
+        // A string field unknown to an older version of a struct will be serialized as binary.
+        try {
+          return new String((byte[])item, "UTF8");
+        } catch (UnsupportedEncodingException e) {
+          throw new TException(e);
+        }
+      } else {
+        throw new TException("Can't convert type to String: " + item.getClass().getName());
+      }
     } catch (ClassCastException e) {
       throw new TException("Expected String value.");
     }
@@ -475,7 +488,7 @@ public class TBSONObjectProtocol extends TProtocol {
       bin = (byte[])item;
     } else if (item instanceof String) {
       // Thrift implicitly expects to be able to read strings as binary where needed. This capability is used
-      // in TProtocolUtil.skip() when skipping over string fields.
+      // in TProtocolUtil.skip() and when reading unknown string fields.
       try {
         bin = ((String)item).getBytes("UTF8");
       } catch (UnsupportedEncodingException e) {

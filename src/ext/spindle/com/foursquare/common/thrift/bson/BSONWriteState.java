@@ -2,15 +2,14 @@
 
 package com.foursquare.common.thrift.bson;
 
+import com.foursquare.common.thrift.base.NonStringMapKeyException;
 import com.mongodb.BasicDBList;
+import org.apache.thrift.TException;
+import org.bson.BSONObject;
 
-import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
-
-import org.apache.thrift.TException;
-import org.bson.BSONObject;
 
 
 /**
@@ -22,7 +21,7 @@ import org.bson.BSONObject;
  * @param <B> The subtype of BSONObject we work with (e.g., com.mongodb.DBObject). This allows us to decouple from
  * MongoDB-specific subtypes and operate at the level of generic BSON.
  */
-class BSONWriteState<B extends BSONObject> {
+public class BSONWriteState<B extends BSONObject> {
 
   private interface WriteContext {
     void putItem(Object item) throws TException;
@@ -43,7 +42,7 @@ class BSONWriteState<B extends BSONObject> {
           currentKey = null;
         }
       } catch (ClassCastException e) {
-        throw new TException("Expected string document key but got a " + item.getClass().getName());
+        throw new NonStringMapKeyException(item);
       }
     }
   }
@@ -76,7 +75,7 @@ class BSONWriteState<B extends BSONObject> {
     return rootDocument;
   }
 
-  void putValue(Object val) throws TException {
+  public void putValue(Object val) throws TException {
     currentWriteContext().putItem(val);
   }
 

@@ -2,8 +2,6 @@
 
 package com.foursquare.common.thrift.bson;
 
-import java.io.IOException;
-
 import com.foursquare.common.thrift.base.TTransportInputStream;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocol;
@@ -15,6 +13,8 @@ import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
 import org.bson.BasicBSONEncoder;
 
+import java.io.IOException;
+
 
 /**
  * BSON protocol implementation for thrift. Not that useful, since the only known use of BSON is as MongoDB's
@@ -25,7 +25,7 @@ import org.bson.BasicBSONEncoder;
  */
 public class TBSONProtocol extends TBSONObjectProtocol {
   // Our superclass uses a dummy transport, and we mediate its input/output from/to this transport.
-  private TTransport realTransport;
+  protected TTransport realTransport;
 
   /**
    * Factory for protocol objects used for serializing BSON.

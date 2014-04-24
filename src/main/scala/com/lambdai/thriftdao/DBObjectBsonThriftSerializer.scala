@@ -4,6 +4,7 @@ import com.twitter.scrooge.{ThriftStruct, ThriftStructSerializer, ThriftStructCo
 import com.foursquare.common.thrift.bson.TBSONProtocol
 import com.mongodb.casbah.Imports._
 import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
+import com.lambdai.thriftdao.bson.LTBSONProtocol
 
 /**
  * This class assume that the first field is the index
@@ -15,12 +16,12 @@ trait DBObjectBsonThriftSerializer[T <: ThriftStruct] {
   val bsonEncoder = new DefaultDBEncoder
 
   val serializer = new ThriftStructSerializer[T] {
-    val protocolFactory = new TBSONProtocol.WriterFactory
+    val protocolFactory = new LTBSONProtocol.WriterFactory
     def codec = DBObjectBsonThriftSerializer.this.codec
   }
 
   val deserializer = new ThriftStructSerializer[T] {
-    val protocolFactory = new TBSONProtocol.ReaderFactory
+    val protocolFactory = new LTBSONProtocol.ReaderFactory
     def codec = DBObjectBsonThriftSerializer.this.codec
   }
 
