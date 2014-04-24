@@ -34,7 +34,7 @@ public class LTBSONProtocol extends TBSONProtocol {
   @Override
   public TField readFieldBegin() throws TException {
     TField res = super.readFieldBegin();
-    if (res.name.isEmpty() && res.type == TType.STOP && res.id == 0) { // NO_MORE_FIELDS
+    if (res.type == TType.STOP) {
       return res;
     }
     return new TField(res.name, res.type, Short.parseShort(res.name));
