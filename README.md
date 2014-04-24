@@ -1,5 +1,6 @@
 thriftdao
 =========
+[![Build Status](https://travis-ci.org/lambda-initiative/thriftdao.svg?branch=master)](https://travis-ci.org/lambda-initiative/thriftdao)
 
 Use thrift as IDL and dao (Now only support scrooge -> mongodb)
 
