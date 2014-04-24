@@ -5,8 +5,9 @@ import org.apache.thrift.protocol.TField
 import scala.collection.mutable
 
 trait Schemas {
-  def create[T <: ThriftStruct](codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField],
-                                                              indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
+  protected def create[T <: ThriftStruct](
+      codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField],
+      indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
     new Schema[T, codec.type](codec, primaryKey, indexes)
   }
 
@@ -21,5 +22,5 @@ trait Schemas {
     allSchema(codec).asInstanceOf[Schema[T, codec.type]]
   }
 
-  private val allSchema = new mutable.HashMap[ThriftStructCodec[_], AnyRef]
+  protected val allSchema = new mutable.HashMap[ThriftStructCodec[_], AnyRef]
 }
