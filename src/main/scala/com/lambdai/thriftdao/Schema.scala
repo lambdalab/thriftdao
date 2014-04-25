@@ -15,7 +15,7 @@ class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](val codec: C, val pri
       def codec = Schema.this.codec
       def serializer = DBObjectBsonThriftSerializer(codec)
       def coll = db(codec.metaData.structName)
-      def fields = primaryKey.map(_(codec))
+      def primaryFields = primaryKey.map(_(codec))
     }
     
     for (Index(name, unique, fields) <- indexes) {

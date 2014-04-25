@@ -5,6 +5,7 @@ import com.foursquare.common.thrift.bson.TBSONProtocol
 import com.mongodb.casbah.Imports._
 import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
 import com.lambdai.thriftdao.bson.LTBSONProtocol
+import scala.collection.mutable
 
 /**
  * This class assume that the first field is the index
@@ -40,5 +41,15 @@ object DBObjectBsonThriftSerializer {
     new DBObjectBsonThriftSerializer[T] {
       def codec = _codec
     }
+  }
+
+  private val serializerCache = mutable.Map[ThriftStructCodec[ThriftStruct], DBObjectBsonThriftSerializer[ThriftStruct]]()
+
+  def unsafeToDBObject(t: ThriftStruct): DBObject = {
+    val comp: ThriftStructCodec[ThriftStruct] = ReflectionHelper.companion(t)
+    val serializer = serializerCache.getOrElseUpdate(comp, new DBObjectBsonThriftSerializer[ThriftStruct] {
+      val codec = comp
+    })
+    serializer.toDBObject(t)
   }
 }
