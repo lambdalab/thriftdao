@@ -9,7 +9,7 @@ class DBObjectBsonThriftSerializerSuite extends FunSuite {
     val s1 = SimpleStruct("c")
     val dbo = serializer.toDBObject(s1)
     val s2 = serializer.fromDBObject(dbo)
-    assert(s2.field == "c")
+    assert(s2.str == "c")
     assert(s1 == s2)
   }
 }
