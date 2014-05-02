@@ -32,9 +32,8 @@ repositories {
 
 dependencies {
     compile "com.foursquare:common-thrift-bson:2.0.0-M2"
-    compile "org.mongodb:mongo-java-driver:2.9.3"
     compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
-    compile "org.mongodb:casbah_${scalaLevel}:2.7.0"
+    compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
     compile "org.scala-lang:scala-reflect:${scalaVersion}"
 
     testCompile "junit:junit:4.11"

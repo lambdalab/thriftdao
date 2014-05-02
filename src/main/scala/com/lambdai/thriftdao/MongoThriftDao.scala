@@ -1,6 +1,7 @@
 package com.lambdai.thriftdao
 
 import com.mongodb.casbah.Imports._
+
 import com.twitter.scrooge.{ThriftEnum, ThriftStruct, ThriftStructCodec}
 import org.apache.thrift.protocol._
 import scala.util.matching.Regex
@@ -30,6 +31,11 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     } else {
       coll.insert(dbo)
     }
+  }
+
+  def insert(objs: List[T]): Unit = {
+    val dbos = objs.map(serializer.toDBObject(_))
+    coll.insert(dbos: _*)(x => x, concern = WriteConcern.Normal.continueOnError(true)) // TODO, investigate why implicit doesn't work
   }
 
   def findAll(): Iterator[T] = {
