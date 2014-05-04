@@ -17,7 +17,13 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       DBObject(fields.map(field => field.id.toString -> 1)),
       coll.name + "-" + indexName + "-index", unique)
   }
-      
+
+  def ensureIndexNested(indexName: String, unique: Boolean, nfields: List[List[TField]]): Unit = {
+    coll.ensureIndex(
+      DBObject(nfields.map(fields => toLabel(fields) -> 1)),
+      coll.name + "-" + indexName + "-index", unique)
+  }
+
   private val primaryKey = DBObject(primaryFields.map(f => f.id.toString -> 1))
   
   if (primaryKey.size > 0)

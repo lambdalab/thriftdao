@@ -42,7 +42,7 @@ trait DBObjectHelper {
    * the returned DBObject will match all the Nodes with fileLoc's projectId in value of 'pid'
    */
   protected def toDBObjectValue(fields: List[TField], v: Any) = {
-    val key = fields.map(f => f.id.toString).mkString(".")
+    val key = toLabel(fields)
     val lastField = fields.last
 
     key -> ((lastField.`type`, v) match {
@@ -62,5 +62,9 @@ trait DBObjectHelper {
       }
       case (_, _) => throw new RuntimeException("thrift type mismatch: %d vs %s".format(lastField.`type`, v.getClass.getSimpleName))
     })
+  }
+
+  protected def toLabel(fields: List[TField]) = {
+    fields.map(f => f.id.toString).mkString(".")
   }
 }
