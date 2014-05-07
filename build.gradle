@@ -31,7 +31,7 @@ repositories {
 }
 
 dependencies {
-    compile "com.foursquare:common-thrift-bson:2.0.0-M2"
+    compile "com.foursquare:common-thrift-bson:2.0.0-M3"
     compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
     compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
     compile "org.scala-lang:scala-reflect:${scalaVersion}"

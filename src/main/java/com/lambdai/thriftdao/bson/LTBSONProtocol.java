@@ -19,15 +19,7 @@ public class LTBSONProtocol extends TBSONProtocol {
 
   static TBSONObjectProtocol doCreateBlankProtocol(TTransport trans) {
       LTBSONProtocol ret = new LTBSONProtocol();
-      try {
-        Field transField = TBSONProtocol.class.getDeclaredField("realTransport");
-        transField.setAccessible(true);
-        transField.set(ret, trans);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    // When pull is already change above logic to:
-//      ret.realTransport = trans;
+      ret.realTransport = trans;
       return ret;
   }
 
