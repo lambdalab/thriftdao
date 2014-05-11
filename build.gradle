@@ -1,14 +1,14 @@
-if (!hasProperty('scalaVersion')) {
-  ext.scalaVersion = '2.10.4'
-}
-def (major, minor, trivial) = scalaVersion.tokenize('.')
-ext.scalaLevel = major + "." + minor
-
-if (!hasProperty('scroogeVersion')) {
-  ext.scroogeVersion = '3.14.1'
-}
-
 buildscript {
+  if (!hasProperty('scalaVersion')) {
+    ext.scalaVersion = '2.10.4'
+  }
+  def (major, minor, trivial) = scalaVersion.tokenize('.')
+  ext.scalaLevel = major + "." + minor
+
+  if (!hasProperty('scroogeVersion')) {
+    ext.scroogeVersion = '3.14.1'
+  }
+
   repositories {
     mavenCentral()
   }
@@ -40,7 +40,6 @@ dependencies {
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
 
-// TODO refactor the scrooge generator
 compileScrooge {
   thriftFiles = fileTree(dir: "src/test/thrift", include: "**/*.thrift")
   dest = file("gen/test/scala")
