@@ -38,9 +38,11 @@ trait DBObjectBsonThriftSerializer[T <: ThriftStruct] {
 
 object DBObjectBsonThriftSerializer {
   def apply[T <: ThriftStruct](_codec: ThriftStructCodec[T]): DBObjectBsonThriftSerializer[T] = {
-    new DBObjectBsonThriftSerializer[T] {
+    val s = new DBObjectBsonThriftSerializer[T] {
       def codec = _codec
     }
+    serializerCache += _codec.asInstanceOf[ThriftStructCodec[ThriftStruct]] -> s.asInstanceOf[DBObjectBsonThriftSerializer[ThriftStruct]]
+    s
   }
 
   private val serializerCache = mutable.Map[ThriftStructCodec[ThriftStruct], DBObjectBsonThriftSerializer[ThriftStruct]]()

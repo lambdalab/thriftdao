@@ -3,7 +3,7 @@ package com.lambdai.thriftdao
 import org.apache.thrift.protocol.{TType, TField}
 import com.mongodb.casbah.Imports._
 import scala.util.matching.Regex
-import com.twitter.scrooge.{ThriftStruct, ThriftEnum}
+import com.twitter.scrooge.{ThriftStructCodec, ThriftStruct, ThriftEnum}
 
 trait DBObjectHelper {
   protected def toDBObject(condition: Traversable[Pair[List[TField], Any]]): DBObject = {
@@ -58,6 +58,7 @@ trait DBObjectHelper {
         //        val comp = companion(s).asInstanceOf[ThriftStructCodec[_]]
         //        if (f. comp.metaData.structName)
         // TODO get the field's manifest and do the verify xxxFieldManifest
+
         DBObjectBsonThriftSerializer.unsafeToDBObject(s)
       }
       case (_, _) => throw new RuntimeException("thrift type mismatch: %d vs %s".format(lastField.`type`, v.getClass.getSimpleName))

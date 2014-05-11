@@ -6,7 +6,7 @@ import scala.collection.mutable
 
 trait Schemas {
   protected def create[T <: ThriftStruct](
-      codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField],
+      codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField] = Nil,
       indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
     new Schema[T, codec.type](codec, primaryKey, indexes)
   }
