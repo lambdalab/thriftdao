@@ -1,48 +1,48 @@
 if (!hasProperty('scalaVersion')) {
-    scalaVersion = '2.10.4'
+  ext.scalaVersion = '2.10.4'
 }
 def (major, minor, trivial) = scalaVersion.tokenize('.')
-scalaLevel = major + "." + minor
+ext.scalaLevel = major + "." + minor
 
 if (!hasProperty('scroogeVersion')) {
-    scroogeVersion = '3.14.1'
+  ext.scroogeVersion = '3.14.1'
 }
 
 buildscript {
-    repositories {
-        mavenCentral()
-    }
+  repositories {
+    mavenCentral()
+  }
 
-    dependencies {
-        classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:0.5"
-        classpath "org.scala-lang:scala-library:${scalaVersion}"
-        classpath "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
-    }
+  dependencies {
+    classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:0.5"
+    classpath "org.scala-lang:scala-library:${scalaVersion}"
+    classpath "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
+  }
 }
 
 apply {
-    plugin "scrooge-gradle-plugin"
-    plugin "scala"
+  plugin "scrooge-gradle-plugin"
+  plugin "scala"
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    compile "com.foursquare:common-thrift-bson:2.0.0-M4"
-    compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
-    compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
+  compile "com.foursquare:common-thrift-bson:2.0.0-M4"
+  compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
+  compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
 
-    testCompile "junit:junit:4.11"
-    testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
+  testCompile "junit:junit:4.11"
+  testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
 }
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
 
 // TODO refactor the scrooge generator
 compileScrooge {
-    thriftFiles = fileTree(dir: "src/test/thrift", include: "**/*.thrift")
-    dest = file("gen/test/scala")
+  thriftFiles = fileTree(dir: "src/test/thrift", include: "**/*.thrift")
+  dest = file("gen/test/scala")
 }
 tasks.compileTestScala.dependsOn(compileScrooge)
