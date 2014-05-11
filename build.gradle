@@ -5,7 +5,7 @@ def (major, minor, trivial) = scalaVersion.tokenize('.')
 scalaLevel = major + "." + minor
 
 if (!hasProperty('scroogeVersion')) {
-    scroogeVersion = '3.13.2'
+    scroogeVersion = '3.14.1'
 }
 
 buildscript {
@@ -23,7 +23,6 @@ buildscript {
 apply {
     plugin "scrooge-gradle-plugin"
     plugin "scala"
-    plugin "eclipse"
 }
 
 repositories {
@@ -31,16 +30,13 @@ repositories {
 }
 
 dependencies {
-    compile "com.foursquare:common-thrift-bson:2.0.0-M3"
+    compile "com.foursquare:common-thrift-bson:2.0.0-M4"
     compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
     compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
-    compile "org.scala-lang:scala-reflect:${scalaVersion}"
 
     testCompile "junit:junit:4.11"
     testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
 }
-
-sourceSets.main.java.srcDirs += ["src/ext/spindle"]
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
 
