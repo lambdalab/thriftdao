@@ -25,14 +25,46 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   private val primaryKey = DBObject(primaryFields.map(f => f.id.toString -> 1))
-  
-  if (primaryKey.size > 0)
+
+  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
     coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
-  
+  }
+
+  private def withId(dbo: DBObject): DBObject = {
+    if (primaryKey.size == 1) {
+      val k = primaryFields(0).id.toString
+      if (dbo.contains(k)) {
+        val v = dbo(k)
+        dbo -= k
+        dbo += "_id" -> v
+      }
+    }
+    dbo
+  }
+
+  private def toDBObjectWithId(t: T) = {
+    val dbo = serializer.toDBObject(t)
+    withId(dbo)
+  }
+
+  private def fromDBObjectWithId(dbo: DBObject): T = {
+    if (primaryKey.size == 1) {
+      val k = primaryFields(0).id.toString
+      val v = dbo("_id")
+      dbo -= "_id"
+      dbo += k -> v
+    }
+    serializer.fromDBObject(dbo)
+  }
+
   def store(obj: T): Unit = {
-    val dbo = serializer.toDBObject(obj)
+    val dbo = toDBObjectWithId(obj)
     if (primaryKey.size > 0) {
-      val keyDbo = filter(dbo, primaryFields)
+
+      val keyDbo = {
+        if (primaryKey.size == 1) DBObject("_id" -> dbo("_id"))
+        else filter(dbo, primaryFields)
+      }
       coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
     } else {
       coll.insert(dbo)
@@ -40,12 +72,12 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def insert(objs: List[T]): Unit = {
-    val dbos = objs.map(serializer.toDBObject(_))
+    val dbos = objs.map(toDBObjectWithId)
     coll.insert(dbos: _*)(x => x, concern = WriteConcern.Normal.continueOnError(true)) // TODO, investigate why implicit doesn't work
   }
 
   def findAll(): Iterator[T] = {
-    coll.find().map(dbo => serializer.fromDBObject(dbo))
+    coll.find().map(dbo => fromDBObjectWithId(dbo))
   }
 
   def removeOne(condition: Pair[TField, Any]*): Option[T] = {
@@ -53,7 +85,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def removeOneNested(condition: Pair[List[TField], Any]*): Option[T] = {
-    coll.findAndRemove(toDBObject(condition)).map(dbo => serializer.fromDBObject(dbo))
+    coll.findAndRemove(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
   }
 
   def removeAll(condition: Pair[TField, Any]*) = {
@@ -61,7 +93,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def removeAllNested(condition: Pair[List[TField], Any]*) = {
-    coll.remove(toDBObject(condition))
+    coll.remove(withId(toDBObject(condition)))
   }
 
   def find(condition: Pair[TField, Any]*): Iterator[T] = {
@@ -69,7 +101,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def findNested(condition: Pair[List[TField], Any]*): Iterator[T] = {
-    coll.find(toDBObject(condition)).map(dbo => serializer.fromDBObject(dbo))
+    coll.find(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
   }
 
   def findOne(condition: Pair[TField, Any]*): Option[T] = {
@@ -77,7 +109,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def findOneNested(condition: Pair[List[TField], Any]*): Option[T] = {
-    coll.findOne(toDBObject(condition)).map(dbo => serializer.fromDBObject(dbo))
+    coll.findOne(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
   }
 
   def update(condition: Traversable[Pair[TField, Any]], set: Traversable[Pair[TField, Any]], inc: Traversable[Pair[TField, AnyVal]] = Nil): Unit = {
@@ -85,7 +117,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def updateNested(condition: Traversable[Pair[List[TField], Any]], set: Traversable[Pair[List[TField], Any]], inc: Traversable[Pair[List[TField], AnyVal]] = Nil): Unit = {
-    val query = toDBObject(condition)
+    val query = withId(toDBObject(condition))
     val setObj = toDBObject(set)
     val incObj = toDBObject(inc)
     val updateObj = {
