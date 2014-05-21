@@ -11,7 +11,7 @@ object TestSchemas extends Schemas {
   )
   apply(
     SimpleStruct -> create(SimpleStruct) (
-      primaryKey = List(_.StrField)
+      primaryKey = Nil
     )
   )
 }
