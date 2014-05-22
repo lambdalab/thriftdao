@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 object TestSchemas extends Schemas {
   apply(

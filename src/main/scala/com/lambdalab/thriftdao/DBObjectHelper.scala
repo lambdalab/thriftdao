@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 import org.apache.thrift.protocol.{TType, TField}
 import com.mongodb.casbah.Imports._

@@ -1,12 +1,10 @@
-package com.lambdai.thriftdao.bson;
+package com.lambdalab.thriftdao.bson;
 
 import com.foursquare.common.thrift.bson.TBSONObjectProtocol;
 import com.foursquare.common.thrift.bson.TBSONProtocol;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.*;
 import org.apache.thrift.transport.TTransport;
-
-import java.lang.reflect.Field;
 
 public class LTBSONProtocol extends TBSONProtocol {
   public static class WriterFactory extends TBSONProtocol.WriterFactory {

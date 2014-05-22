@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 //import scala.reflect.runtime.currentMirror
 

@@ -1,4 +1,4 @@
-namespace java com.lambdai.thriftdao
+namespace java com.lambdalab.thriftdao
 
 enum Nationality {
   CHINA

@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 import com.twitter.scrooge.{ThriftStructCodec, ThriftStruct}
 import org.apache.thrift.protocol.TField

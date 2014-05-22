@@ -1,10 +1,10 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 import com.twitter.scrooge.{ThriftStruct, ThriftStructSerializer, ThriftStructCodec}
 import com.foursquare.common.thrift.bson.TBSONProtocol
 import com.mongodb.casbah.Imports._
 import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
-import com.lambdai.thriftdao.bson.LTBSONProtocol
+import com.lambdalab.thriftdao.bson.LTBSONProtocol
 import scala.collection.mutable
 
 /**

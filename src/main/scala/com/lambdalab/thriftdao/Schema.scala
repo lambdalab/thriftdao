@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 import com.mongodb.casbah.Imports._
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec}

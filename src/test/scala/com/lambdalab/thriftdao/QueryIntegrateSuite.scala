@@ -1,4 +1,4 @@
-package com.lambdai.thriftdao
+package com.lambdalab.thriftdao
 
 import org.scalatest.FunSuite
 import com.mongodb.casbah.Imports._
