@@ -50,7 +50,8 @@ trait DBObjectHelper {
       case (TType.STRING, _: String) => v
       case (TType.STRING, _: Regex) => v
       case (TType.I32, _: Int) | (TType.I16, _: Short) | (TType.I64, _: Long) => v
-      case (TType.LIST, _: List[_]) => v
+      case (TType.LIST, l: List[ThriftStruct]) => l.map(e => DBObjectBsonThriftSerializer.unsafeToDBObject(e))
+      case (TType.LIST, l: List[_]) => v
       case (TType.MAP, _: Map[_, _]) => v
       case (TType.SET, _: Set[_]) => v
       case (TType.ENUM, e: ThriftEnum) => e.getValue() // type unsafe
