@@ -71,7 +71,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
   }
 
-  def insert(objs: List[T]): Unit = {
+  def insert(objs: Seq[T]): Unit = {
     val dbos = objs.map(toDBObjectWithId)
     coll.insert(dbos: _*)(x => x, concern = WriteConcern.Normal.continueOnError(true)) // TODO, investigate why implicit doesn't work
   }
