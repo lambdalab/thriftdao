@@ -97,7 +97,11 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def find(condition: Pair[TField, Any]*): Iterator[T] = {
-    findNested(condition.map(c => List(c._1) -> c._2): _*)
+   findNested(condition.map(c => List(c._1) -> c._2): _*)
+  }
+
+  def find(dbo: DBObject): Iterator[T] = {
+    coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
   }
 
   def findNested(condition: Pair[List[TField], Any]*): Iterator[T] = {

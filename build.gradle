@@ -32,7 +32,7 @@ repositories {
 dependencies {
   compile "com.foursquare:common-thrift-bson:2.0.0-M4"
   compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
-  compile "org.mongodb:casbah_${scalaLevel}:2.7.1"
+  compile "org.mongodb:casbah_${scalaLevel}:2.7.2"
 
   testCompile "junit:junit:4.11"
   testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
