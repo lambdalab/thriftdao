@@ -5,18 +5,14 @@ buildscript {
   def (major, minor, trivial) = scalaVersion.tokenize('.')
   ext.scalaLevel = major + "." + minor
 
-  if (!hasProperty('scroogeVersion')) {
-    ext.scroogeVersion = '3.14.1'
-  }
-
   repositories {
     mavenCentral()
   }
 
   dependencies {
-    classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:0.5"
+    classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:+"
     classpath "org.scala-lang:scala-library:${scalaVersion}"
-    classpath "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
+    classpath "com.twitter:scrooge-generator_${scalaLevel}:3.+"
   }
 }
 
@@ -30,12 +26,12 @@ repositories {
 }
 
 dependencies {
-  compile "com.foursquare:common-thrift-bson:2.0.0-M4"
-  compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
-  compile "org.mongodb:casbah_${scalaLevel}:2.7.2"
+  compile "com.foursquare:common-thrift-bson:2.+"
+  compile "com.twitter:scrooge-serializer_${scalaLevel}:3.+"
+  compile "org.mongodb:casbah_${scalaLevel}:2.+"
 
-  testCompile "junit:junit:4.11"
-  testCompile "org.scalatest:scalatest_${scalaLevel}:2.1.0"
+  testCompile "junit:junit:4.+"
+  testCompile "org.scalatest:scalatest_${scalaLevel}:2.+"
 }
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
