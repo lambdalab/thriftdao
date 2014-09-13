@@ -174,6 +174,10 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       coll.findOne(dbo).map(dbo => fromDBObjectWithId(dbo))
     }
 
+    def exist(): Boolean = {
+      coll.find(dbo).limit(1).hasNext
+    }
+
     def set(assoc: (TField, Any)): Unit = set(convertAssoc(assoc))
     def set(assocs: FieldAssoc*): Unit = {
       update(set = assocs, inc = Nil)
