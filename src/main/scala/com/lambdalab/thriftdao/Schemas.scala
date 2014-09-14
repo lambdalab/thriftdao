@@ -24,7 +24,7 @@ trait Schemas {
 
   protected val allSchema = new mutable.HashMap[ThriftStructCodec[_], AnyRef]
 }
-
-object Schemas extends Schemas {
-
-}
+//
+//object Schemas extends Schemas {
+//
+//}

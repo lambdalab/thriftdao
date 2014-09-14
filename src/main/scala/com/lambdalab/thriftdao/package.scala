@@ -1,5 +1,6 @@
 package com.lambdalab
 
+import com.mongodb.DBObject
 import org.apache.thrift.protocol.TField
 
 package object thriftdao {
@@ -7,5 +8,7 @@ package object thriftdao {
     FieldSelector(fields: _*)
   }
 
-  type FieldAssoc =  Pair[FieldSelector,Any]
+  type FieldAssoc =  Pair[FieldSelector, Any]
+  type FieldFilter =  Pair[FieldSelector, DBObject]
+
 }

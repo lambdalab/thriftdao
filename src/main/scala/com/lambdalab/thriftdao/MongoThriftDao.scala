@@ -157,7 +157,6 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   case class Select(assocs: FieldAssoc*) {
-
     private def getList(assocs: Traversable[FieldAssoc]) = {
       assocs.map(p => (p._1.fields.toList, p._2))
     }
@@ -168,6 +167,11 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
     def find() = {
       coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
+    }
+
+    def find(keys: FieldFilter*) = {
+      val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
+      coll.find(dbo, filter).map(dbo => fromDBObjectWithId(dbo))
     }
 
     def findOne() = {
