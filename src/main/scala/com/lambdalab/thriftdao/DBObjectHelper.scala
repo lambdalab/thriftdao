@@ -1,9 +1,10 @@
 package com.lambdalab.thriftdao
 
-import org.apache.thrift.protocol.{TType, TField}
 import com.mongodb.casbah.Imports._
+import com.twitter.scrooge.{ThriftEnum, ThriftStruct}
+import org.apache.thrift.protocol.{TField, TType}
+
 import scala.util.matching.Regex
-import com.twitter.scrooge.{ThriftStructCodec, ThriftStruct, ThriftEnum}
 
 trait DBObjectHelper {
   protected def toDBObject(condition: Traversable[Pair[List[TField], Any]]): DBObject = {
@@ -50,8 +51,14 @@ trait DBObjectHelper {
       case (TType.STRING, _: String) => v
       case (TType.STRING, _: Regex) => v
       case (TType.I32, _: Int) | (TType.I16, _: Short) | (TType.I64, _: Long) => v
-      case (TType.LIST, l: List[ThriftStruct]) => l.map(e => DBObjectBsonThriftSerializer.unsafeToDBObject(e))
-      case (TType.LIST, l: List[_]) => v
+      case (TType.LIST, l: List[_]) => {
+        if (l.isEmpty) l else {
+          l.head match {
+            case l1: ThriftStruct => l.map(e => DBObjectBsonThriftSerializer.unsafeToDBObject(e.asInstanceOf[ThriftStruct]))
+            case _ => l
+          }
+        }
+      }
       case (TType.MAP, _: Map[_, _]) => v
       case (TType.SET, _: Set[_]) => v
       case (TType.ENUM, e: ThriftEnum) => e.getValue() // type unsafe
