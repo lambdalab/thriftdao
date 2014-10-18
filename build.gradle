@@ -28,6 +28,7 @@ repositories {
 dependencies {
   compile "com.foursquare:common-thrift-bson:2.+"
   compile "com.twitter:scrooge-serializer_2.10:3.+" // TODO bump the version once scrooge is updated
+  compile "com.twitter:scrooge-runtime_2.10:3.+" // TODO bump the version once scrooge is updated
   compile "org.mongodb:casbah_${scalaLevel}:2.+"
 
   testCompile "junit:junit:4.+"
