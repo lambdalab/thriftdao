@@ -95,40 +95,12 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def find(condition: Pair[TField, Any]*): Iterator[T] = {
-   findNested(condition.map(c => List(c._1) -> c._2): _*)
-  }
-
-  def find(dbo: DBObject): Iterator[T] = {
-    coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
-  }
-
-  def findNested(condition: Pair[List[TField], Any]*): Iterator[T] = {
-    coll.find(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
+    select(condition.map(convertAssoc) : _*).find()
   }
 
   def findOne(condition: Pair[TField, Any]*): Option[T] = {
-    findOneNested(condition.map(c => List(c._1) -> c._2): _*)
+    select(condition.map(convertAssoc) : _*).findOne()
   }
-
-  def findOneNested(condition: Pair[List[TField], Any]*): Option[T] = {
-    coll.findOne(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
-  }
-
-//
-//  def update(condition: Traversable[Pair[TField, Any]], set: Traversable[Pair[TField, Any]], inc: Traversable[Pair[TField, AnyVal]] = Nil): Unit = {
-//    updateNested(condition.map(c => List(c._1) -> c._2), set.map(s => List(s._1) -> s._2), inc.map(i => List(i._1) -> i._2))
-//  }
-//
-//  def updateNested(condition: Traversable[Pair[List[TField], Any]], set: Traversable[Pair[List[TField], Any]], inc: Traversable[Pair[List[TField], AnyVal]] = Nil): Unit = {
-//    val query = withId(toDBObject(condition))
-//    val setObj = toDBObject(set)
-//    val incObj = toDBObject(inc)
-//    val updateObj = {
-//      if (incObj.isEmpty) DBObject("$set" -> setObj)
-//      else DBObject("$set" -> setObj, "$inc" -> incObj)
-//    }
-//    coll.update(query, updateObj, upsert = false, multi = true)
-//  }
 
   //////////////////////// New API
 
@@ -143,14 +115,6 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def select(assocs: FieldAssoc*) = {
     Select(assocs: _*)
   }
-
-//  def find(assocs: FieldAssoc*) = {
-//    select(assocs: _*).find()
-//  }
-
-//  def findOne(assocs: FieldAssoc*) = {
-//    select(assocs: _*).findOne()
-//  }
 
   def update(assocs: Traversable[FieldAssoc], set: Traversable[FieldAssoc], inc: Traversable[FieldAssoc]) = {
     select(assocs.toSeq: _*).update(set, inc)
@@ -185,6 +149,10 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
     def exist(): Boolean = {
       coll.find(dbo).limit(1).hasNext
+    }
+
+    def remove() = {
+      coll.remove(dbo)
     }
 
     def set(assoc: (TField, Any)): Unit = set(convertAssoc(assoc))
