@@ -1,10 +1,4 @@
 buildscript {
-//  if (!hasProperty('scalaVersion')) {
-//    ext.scalaVersion = '2.10.4'
-//  }
-//  def (major, minor, trivial) = scalaVersion.tokenize('.')
-//  ext.scalaLevel = major + "." + minor
-
   repositories {
     mavenCentral()
   }
@@ -15,6 +9,12 @@ buildscript {
     classpath "com.twitter:scrooge-generator_2.10:3.+"
   }
 }
+
+if (!hasProperty('scalaVersion')) {
+  ext.scalaVersion = '2.10.4'
+}
+def (major, minor, trivial) = scalaVersion.tokenize('.')
+ext.scalaLevel = major + "." + minor
 
 apply {
   plugin "scrooge-gradle-plugin"
@@ -27,7 +27,7 @@ repositories {
 
 dependencies {
   compile "com.foursquare:common-thrift-bson:2.+"
-  compile "com.twitter:scrooge-serializer_2.10:3.+" // TODO bump the version once scrooge is updated
+  compile "com.twitter:scrooge-serializer_${scalaLevel}:3.+"
   compile "com.twitter:scrooge-runtime_2.10:3.+" // TODO bump the version once scrooge is updated
   compile "org.mongodb:casbah_${scalaLevel}:2.+"
 
