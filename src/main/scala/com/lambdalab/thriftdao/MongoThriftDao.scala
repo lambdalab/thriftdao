@@ -24,9 +24,9 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   private val primaryKey = DBObject(primaryFields.map(f => f.id.toString -> 1))
 
-  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
-    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
-  }
+//  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
+//    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
+//  }
 
   private def withId(dbo: DBObject): DBObject = {
     if (primaryKey.size == 1) {
@@ -35,6 +35,17 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
         val v = dbo(k)
         dbo -= k
         dbo += "_id" -> v
+      }
+    } else if (primaryFields.size > 0) {
+      val pValues: Traversable[AnyRef] = primaryFields.map { f =>
+        val k = f.id.toString
+        dbo.getAs[String](k)
+      }.flatten
+
+      if (pValues.size == primaryFields.size) {
+        val str = pValues.map(_.toString).mkString
+        val key = java.security.MessageDigest.getInstance("MD5").digest(str.getBytes("UTF-8")).take(12)
+        dbo += "_id" -> new ObjectId(key)
       }
     }
     dbo
@@ -49,9 +60,10 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     if (primaryKey.size == 1) {
       val k = primaryFields(0).id.toString
       val v = dbo("_id")
-      dbo -= "_id"
       dbo += k -> v
     }
+    dbo -= "_id"
+
     serializer.fromDBObject(dbo)
   }
 
@@ -130,6 +142,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
 
     def find() = {
+      println(dbo.toString)
       coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
     }
 
