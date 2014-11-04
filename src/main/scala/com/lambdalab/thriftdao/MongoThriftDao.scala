@@ -142,7 +142,6 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
 
     def find() = {
-      println(dbo.toString)
       coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
     }
 
