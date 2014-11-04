@@ -13,10 +13,6 @@ trait DBObjectHelper {
     ).toList)
   }
 
-  protected def filter(dbo: DBObject, fields: List[TField]): DBObject = {
-    DBObject(fields.map(f => f.id.toString -> dbo(f.id.toString)))
-  }
-
   /*
    * Construct DBObject in terms of field inside multiple layers struct. Please provide fields in
    * the order from outside to inside, strictly enter one layer at a time. Will make it smarter

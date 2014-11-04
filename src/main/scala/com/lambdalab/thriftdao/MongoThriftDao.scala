@@ -70,11 +70,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def store(obj: T): Unit = {
     val dbo = toDBObjectWithId(obj)
     if (primaryKey.size > 0) {
-
-      val keyDbo = {
-        if (primaryKey.size == 1) DBObject("_id" -> dbo("_id"))
-        else filter(dbo, primaryFields)
-      }
+      val keyDbo = DBObject("_id" -> dbo("_id"))
       coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
     } else {
       coll.insert(dbo)
