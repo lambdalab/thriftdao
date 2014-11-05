@@ -39,7 +39,8 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     } else if (primaryFields.size > 0) {
       val pValues: Traversable[AnyRef] = primaryFields.map { f =>
         val k = f.id.toString
-        dbo.getAs[String](k)
+        if (!dbo.containsField(k)) None
+        else Some(dbo.get(k).toString)
       }.flatten
 
       if (pValues.size == primaryFields.size) {

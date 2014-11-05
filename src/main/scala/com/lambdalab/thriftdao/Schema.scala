@@ -4,7 +4,7 @@ import com.mongodb.casbah.Imports._
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec}
 import org.apache.thrift.protocol._
 
-class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](val codec: C, val primaryKey: List[C => TField], val indexes: List[Index[C]]) {
+class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](codec: C, primaryKey: List[C => TField], indexes: List[Index[C]]) {
   /*
    * take a mongodb object and create the actual data access object
    */
@@ -13,7 +13,7 @@ class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](val codec: C, val pri
       def codec = Schema.this.codec
       def serializer = DBObjectBsonThriftSerializer(codec)
       def coll = db(codec.metaData.structName)
-      def primaryFields = primaryKey.map(_(codec))
+      def primaryFields = Schema.this.primaryKey.map(_(codec))
     }
     
     for (Index(name, unique, fields, nfields) <- indexes) {

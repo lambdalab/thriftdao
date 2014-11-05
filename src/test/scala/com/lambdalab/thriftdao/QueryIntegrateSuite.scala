@@ -25,7 +25,7 @@ class QueryIntegrateSuite extends FunSuite {
 
   test("store node") {
     if (db != null) {
-      val n = SimpleStruct("x")
+      val n = SimpleStruct("x", Some("y"), Some(1))
       dao.store(n)
       assert(dao.findOne(SimpleStruct.StrField -> "x") == Some(n))
     }
