@@ -7,7 +7,7 @@ import org.apache.thrift.protocol._
 trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObjectHelper {
   protected def serializer: DBObjectBsonThriftSerializer[T]
   protected def coll: MongoCollection
-  protected def primaryFields: List[TField]
+  protected def primaryFields: List[FieldSelector]
   protected def codec: C
 
   def ensureIndex(indexName: String, unique: Boolean, fields: List[TField]): Unit = {
@@ -22,7 +22,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       coll.name + "-" + indexName + "-index", unique)
   }
 
-  private val primaryKey = DBObject(primaryFields.map(f => f.id.toString -> 1))
+  private val primaryKey = DBObject(primaryFields.map(f => f.toDBKey -> 1))
 
 //  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
 //    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
@@ -30,7 +30,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   private def withId(dbo: DBObject): DBObject = {
     if (primaryKey.size == 1) {
-      val k = primaryFields(0).id.toString
+      val k = primaryFields(0).toDBKey
       if (dbo.contains(k)) {
         val v = dbo(k)
         dbo -= k
@@ -38,7 +38,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       }
     } else if (primaryFields.size > 0) {
       val pValues: Traversable[AnyRef] = primaryFields.map { f =>
-        val k = f.id.toString
+        val k = f.toDBKey
         if (!dbo.containsField(k)) None
         else Some(dbo.get(k).toString)
       }.flatten
@@ -59,7 +59,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   private def fromDBObjectWithId(dbo: DBObject): T = {
     if (primaryKey.size == 1) {
-      val k = primaryFields(0).id.toString
+      val k = primaryFields(0).toDBKey
       val v = dbo("_id")
       dbo += k -> v
     }

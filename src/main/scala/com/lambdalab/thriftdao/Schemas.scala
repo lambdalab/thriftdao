@@ -5,9 +5,15 @@ import org.apache.thrift.protocol.TField
 import scala.collection.mutable
 
 trait Schemas {
+  // TODO merge this with new one
   def create[T <: ThriftStruct](
       codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField] = Nil,
       indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
+    new Schema[T, codec.type](codec, primaryKey.map(f => FieldSelector(f(codec))), indexes)
+  }
+
+  def create2[T <: ThriftStruct](codec: ThriftStructCodec[T]) (primaryKey: List[FieldSelector],
+                                                                 indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
     new Schema[T, codec.type](codec, primaryKey, indexes)
   }
 
