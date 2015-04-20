@@ -87,27 +87,27 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     coll.find().map(dbo => fromDBObjectWithId(dbo))
   }
 
-  def removeOne(condition: Pair[TField, Any]*): Option[T] = {
+  def removeOne(condition: (TField, Any)*): Option[T] = {
     removeOneNested(condition.map(c => List(c._1) -> c._2): _*)
   }
 
-  def removeOneNested(condition: Pair[List[TField], Any]*): Option[T] = {
+  def removeOneNested(condition: (List[TField], Any)*): Option[T] = {
     coll.findAndRemove(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
   }
 
-  def removeAll(condition: Pair[TField, Any]*) = {
+  def removeAll(condition: (TField, Any)*) = {
     removeAllNested(condition.map(c => List(c._1) -> c._2): _*)
   }
 
-  def removeAllNested(condition: Pair[List[TField], Any]*) = {
+  def removeAllNested(condition: (List[TField], Any)*) = {
     coll.remove(withId(toDBObject(condition)))
   }
 
-  def find(condition: Pair[TField, Any]*): Iterator[T] = {
+  def find(condition: (TField, Any)*): Iterator[T] = {
     select(condition.map(convertAssoc) : _*).find()
   }
 
-  def findOne(condition: Pair[TField, Any]*): Option[T] = {
+  def findOne(condition: (TField, Any)*): Option[T] = {
     select(condition.map(convertAssoc) : _*).findOne()
   }
 

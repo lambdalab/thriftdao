@@ -8,7 +8,7 @@ package object thriftdao {
     FieldSelector(fields: _*)
   }
 
-  type FieldAssoc =  Pair[FieldSelector, Any]
-  type FieldFilter =  Pair[FieldSelector, DBObject]
+  type FieldAssoc =  (FieldSelector, Any)
+  type FieldFilter =  (FieldSelector, DBObject)
 
 }

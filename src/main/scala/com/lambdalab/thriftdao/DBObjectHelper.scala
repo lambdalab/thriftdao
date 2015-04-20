@@ -7,7 +7,7 @@ import org.apache.thrift.protocol.{TField, TType}
 import scala.util.matching.Regex
 
 trait DBObjectHelper {
-  protected def toDBObject(condition: Traversable[Pair[List[TField], Any]]): DBObject = {
+  protected def toDBObject(condition: Traversable[(List[TField], Any)]): DBObject = {
     DBObject(condition.map(kv =>
       toDBObjectValue(kv._1, kv._2)
     ).toList)
