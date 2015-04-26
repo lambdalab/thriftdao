@@ -10,11 +10,15 @@ buildscript {
     classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:+"
     classpath "org.scala-lang:scala-library:2.10.4"
     classpath "com.twitter:scrooge-generator_2.10:3.+"
+    classpath 'org.apache.thrift:libthrift:0.9.2'
   }
 }
 
 if (!hasProperty('scalaVersion')) {
   ext.scalaVersion = '2.10.4'
+}
+if (!hasProperty('scroogeVersion')) {
+  ext.scroogeVersion = "3.17.0"
 }
 def (major, minor, trivial) = scalaVersion.tokenize('.')
 ext.scalaLevel = major + "." + minor
@@ -30,8 +34,8 @@ repositories {
 
 dependencies {
   compile "com.foursquare:common-thrift-bson:2.+"
-  compile "com.twitter:scrooge-serializer_${scalaLevel}:3.+"
-  compile "com.twitter:scrooge-runtime_2.10:3.+" // TODO bump the version once scrooge is updated
+  compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
+  compile "com.twitter:scrooge-runtime_${scalaLevel}:${scroogeVersion}"
   compile "org.mongodb:casbah_${scalaLevel}:2.+"
 
   testCompile "junit:junit:4.+"
