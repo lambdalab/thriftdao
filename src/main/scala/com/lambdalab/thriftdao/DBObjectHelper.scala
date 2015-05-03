@@ -47,7 +47,7 @@ trait DBObjectHelper {
       case (TType.STRING, _: String) => v
       case (TType.STRING, _: Regex) => v
       case (TType.I32, _: Int) | (TType.I16, _: Short) | (TType.I64, _: Long) => v
-      case (TType.LIST, l: List[_]) => {
+      case (TType.LIST, l: Traversable[_]) => {
         if (l.isEmpty) l else {
           l.head match {
             case l1: ThriftStruct => l.map(e => DBObjectBsonThriftSerializer.unsafeToDBObject(e.asInstanceOf[ThriftStruct]))
