@@ -33,10 +33,10 @@ class QueryIntegrateSuite extends FunSuite {
 
   test("update field") {
     if (db != null) {
-      val n = SimpleStruct("x")
+      val n = SimpleStruct("z")
       dao.store(n)
 //      dao.update(List(SimpleStruct.StrField -> "x"), List(SimpleStruct.StrField -> "y"))
-      dao.select(SimpleStruct.StrField -> "x").set($(SimpleStruct.StrField) -> "y")
+      dao.select(SimpleStruct.StrField -> "z").set($(SimpleStruct.StrField) -> "y")
       assert(dao.findOne(SimpleStruct.StrField -> "y") == Some(SimpleStruct("y")))
     }
   }

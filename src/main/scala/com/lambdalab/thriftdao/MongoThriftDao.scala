@@ -70,7 +70,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   def store(obj: T): Unit = {
     val dbo = toDBObjectWithId(obj)
-    if (primaryKey.size > 0) {
+    if (primaryKey.size == 1) {
       val keyDbo = DBObject("_id" -> dbo("_id"))
       coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
     } else {
@@ -176,8 +176,8 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
     def update(set: Traversable[FieldAssoc], inc: Traversable[FieldAssoc]) = {
       val query = dbo
-      val setObj = toDBObject(getList(set))
-      val incObj = toDBObject(getList(inc))
+      val setObj = withId(toDBObject(getList(set)))
+      val incObj = withId(toDBObject(getList(inc)))
       val updateObj = {
         if (incObj.isEmpty) DBObject("$set" -> setObj)
         else DBObject("$set" -> setObj, "$inc" -> incObj)
