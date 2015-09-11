@@ -9,6 +9,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   protected def coll: MongoCollection
   protected def primaryFields: List[FieldSelector]
   protected def codec: C
+  protected def tracer: DbTracer
 
   def ensureIndex(indexName: String, unique: Boolean, fields: List[TField]): Unit = {
     coll.ensureIndex(
@@ -69,12 +70,14 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def store(obj: T): Unit = {
-    val dbo = toDBObjectWithId(obj)
-    if (primaryKey.size == 1) {
-      val keyDbo = DBObject("_id" -> dbo("_id"))
-      coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
-    } else {
-      coll.insert(dbo)
+    tracer.withTracer("store") {
+      val dbo = toDBObjectWithId(obj)
+      if (primaryKey.size == 1) {
+        val keyDbo = DBObject("_id" -> dbo("_id"))
+        coll.findAndModify(keyDbo, null, null, false, dbo, true, true)
+      } else {
+        coll.insert(dbo)
+      }
     }
   }
 
@@ -84,7 +87,9 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def findAll(): Iterator[T] = {
-    coll.find().map(dbo => fromDBObjectWithId(dbo))
+    tracer.withTracer("find all") {
+      coll.find().map(dbo => fromDBObjectWithId(dbo))
+    }
   }
 
   def removeOne(condition: (TField, Any)*): Option[T] = {
@@ -92,7 +97,9 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def removeOneNested(condition: (List[TField], Any)*): Option[T] = {
-    coll.findAndRemove(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
+    tracer.withTracer("find and remove") {
+      coll.findAndRemove(withId(toDBObject(condition))).map(dbo => fromDBObjectWithId(dbo))
+    }
   }
 
   def removeAll(condition: (TField, Any)*) = {
@@ -100,7 +107,9 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def removeAllNested(condition: (List[TField], Any)*) = {
-    coll.remove(withId(toDBObject(condition)))
+    tracer.withTracer("remove all") {
+      coll.remove(withId(toDBObject(condition)))
+    }
   }
 
   def find(condition: (TField, Any)*): Iterator[T] = {
@@ -139,29 +148,41 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
 
     def find() = {
-      coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
+      tracer.withTracer("[select] find") {
+        coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
+      }
     }
 
     def find(pageNumber: Int, nPerPage: Int) = {
-      val skipped = if (pageNumber > 0) (pageNumber - 1) * nPerPage  else 0
-      coll.find(dbo).skip(skipped).limit(nPerPage).map(dbo => fromDBObjectWithId(dbo))
+      tracer.withTracer("[select] find page %d" format pageNumber) {
+        val skipped = if (pageNumber > 0) (pageNumber - 1) * nPerPage else 0
+        coll.find(dbo).skip(skipped).limit(nPerPage).map(dbo => fromDBObjectWithId(dbo))
+      }
     }
 
     def find(keys: FieldFilter*) = {
-      val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
-      coll.find(dbo, filter).map(dbo => fromDBObjectWithId(dbo))
+      tracer.withTracer("[select] find with filter") {
+        val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
+        coll.find(dbo, filter).map(dbo => fromDBObjectWithId(dbo))
+      }
     }
 
     def findOne() = {
-      coll.findOne(dbo).map(dbo => fromDBObjectWithId(dbo))
+      tracer.withTracer("[select] find one") {
+        coll.findOne(dbo).map(dbo => fromDBObjectWithId(dbo))
+      }
     }
 
     def exist(): Boolean = {
-      coll.find(dbo).limit(1).hasNext
+      tracer.withTracer("[select] exist") {
+        coll.find(dbo).limit(1).hasNext
+      }
     }
 
     def remove() = {
-      coll.remove(dbo)
+      tracer.withTracer("[select] remove") {
+        coll.remove(dbo)
+      }
     }
 
     def set(assoc: (TField, Any)): Unit = set(convertAssoc(assoc))
@@ -175,14 +196,16 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
 
     def update(set: Traversable[FieldAssoc], inc: Traversable[FieldAssoc]) = {
-      val query = dbo
-      val setObj = withId(toDBObject(getList(set)))
-      val incObj = withId(toDBObject(getList(inc)))
-      val updateObj = {
-        if (incObj.isEmpty) DBObject("$set" -> setObj)
-        else DBObject("$set" -> setObj, "$inc" -> incObj)
+      tracer.withTracer("[select] update") {
+        val query = dbo
+        val setObj = withId(toDBObject(getList(set)))
+        val incObj = withId(toDBObject(getList(inc)))
+        val updateObj = {
+          if (incObj.isEmpty) DBObject("$set" -> setObj)
+          else DBObject("$set" -> setObj, "$inc" -> incObj)
+        }
+        coll.update(query, updateObj, upsert = false, multi = true)
       }
-      coll.update(query, updateObj, upsert = false, multi = true)
     }
   }
 }

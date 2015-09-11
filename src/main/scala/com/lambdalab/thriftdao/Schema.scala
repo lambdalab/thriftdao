@@ -5,15 +5,18 @@ import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec}
 import org.apache.thrift.protocol._
 
 class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](codec: C, primaryKey: List[FieldSelector], indexes: List[Index[C]]) {
+  def tracerFactory(col: MongoCollection): DbTracer = DefaultTracer
   /*
    * take a mongodb object and create the actual data access object
    */
   def connect(db: MongoDB): MongoThriftDao[T, C] = {
+    val collection = db(codec.metaData.structName)
     val dao = new MongoThriftDao[T, C] {
       def codec = Schema.this.codec
       def serializer = DBObjectBsonThriftSerializer(codec)
-      def coll = db(codec.metaData.structName)
+      def coll = collection
       def primaryFields = primaryKey
+      def tracer = tracerFactory(collection)
     }
     
     for (index @ Index(name, unique, fields, nfields) <- indexes) {

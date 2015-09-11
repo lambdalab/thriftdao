@@ -1,15 +1,19 @@
 package com.lambdalab.thriftdao
 
+import com.mongodb.casbah.MongoCollection
 import com.twitter.scrooge.{ThriftStructCodec, ThriftStruct}
 import org.apache.thrift.protocol.TField
 import scala.collection.mutable
 
 trait Schemas {
+  def tracerFactory(col: MongoCollection): DbTracer = DefaultTracer
   // TODO merge this with new one
   def create[T <: ThriftStruct](
       codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField] = Nil,
       indexes: List[Index[codec.type]] = Nil): Schema[T, codec.type] = {
-    new Schema[T, codec.type](codec, primaryKey.map(f => FieldSelector(f(codec))), indexes)
+    new Schema[T, codec.type](codec, primaryKey.map(f => FieldSelector(f(codec))), indexes) {
+      override def tracerFactory(col: MongoCollection) = Schemas.this.tracerFactory(col)
+    }
   }
 
   def create2[T <: ThriftStruct](codec: ThriftStructCodec[T]) (primaryKey: List[FieldSelector],
