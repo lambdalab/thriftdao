@@ -2,10 +2,9 @@ package com.lambdalab.thriftdao
 
 import com.mongodb.casbah.Imports._
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec}
-import org.apache.thrift.protocol._
 
 class Schema[T <: ThriftStruct, C <: ThriftStructCodec[T]](codec: C, primaryKey: List[FieldSelector], indexes: List[Index[C]]) {
-  def tracerFactory(col: MongoCollection): DbTracer = DefaultTracer
+  def tracerFactory(col: MongoCollection): DbTracer = DefaultDbTracer
   /*
    * take a mongodb object and create the actual data access object
    */

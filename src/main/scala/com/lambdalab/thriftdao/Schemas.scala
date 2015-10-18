@@ -6,7 +6,7 @@ import org.apache.thrift.protocol.TField
 import scala.collection.mutable
 
 trait Schemas {
-  def tracerFactory(col: MongoCollection): DbTracer = DefaultTracer
+  def tracerFactory(col: MongoCollection): DbTracer = DefaultDbTracer
   // TODO merge this with new one
   def create[T <: ThriftStruct](
       codec: ThriftStructCodec[T]) (primaryKey: List[codec.type => TField] = Nil,

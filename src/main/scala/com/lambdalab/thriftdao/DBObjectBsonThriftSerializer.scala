@@ -1,10 +1,10 @@
 package com.lambdalab.thriftdao
 
-import com.twitter.scrooge.{ThriftStruct, ThriftStructSerializer, ThriftStructCodec}
-import com.foursquare.common.thrift.bson.TBSONProtocol
+import com.lambdalab.thriftdao.bson.LTBSONProtocol
 import com.mongodb.casbah.Imports._
 import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
-import com.lambdalab.thriftdao.bson.LTBSONProtocol
+import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec, ThriftStructSerializer}
+
 import scala.collection.mutable
 
 /**
@@ -41,15 +41,19 @@ object DBObjectBsonThriftSerializer {
     val s = new DBObjectBsonThriftSerializer[T] {
       def codec = _codec
     }
-    serializerCache += _codec.asInstanceOf[ThriftStructCodec[ThriftStruct]] -> s.asInstanceOf[DBObjectBsonThriftSerializer[ThriftStruct]]
+    serializerCache.get() += _codec.asInstanceOf[ThriftStructCodec[ThriftStruct]] -> s.asInstanceOf[DBObjectBsonThriftSerializer[ThriftStruct]]
     s
   }
 
-  private val serializerCache = mutable.Map[ThriftStructCodec[ThriftStruct], DBObjectBsonThriftSerializer[ThriftStruct]]()
+  private val serializerCache = new ThreadLocal[mutable.Map[ThriftStructCodec[ThriftStruct], DBObjectBsonThriftSerializer[ThriftStruct]]] {
+    override def initialValue() = {
+      mutable.Map[ThriftStructCodec[ThriftStruct], DBObjectBsonThriftSerializer[ThriftStruct]]()
+    }
+  }
 
   def unsafeToDBObject(t: ThriftStruct): DBObject = {
     val comp: ThriftStructCodec[ThriftStruct] = ReflectionHelper.companion(t)
-    val serializer = serializerCache.getOrElseUpdate(comp, new DBObjectBsonThriftSerializer[ThriftStruct] {
+    val serializer = serializerCache.get().getOrElseUpdate(comp, new DBObjectBsonThriftSerializer[ThriftStruct] {
       val codec = comp
     })
     serializer.toDBObject(t)
