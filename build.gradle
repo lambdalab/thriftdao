@@ -17,7 +17,7 @@ buildscript {
 apply plugin: "scala"
 
 sourceSets {
-  v211 {
+  v210 {
     scala {
       srcDirs = ['src/main/scala']
     }
@@ -29,16 +29,16 @@ sourceSets {
 
 configurations {
   commonCompile
-  v211
+  v210
 }
 
-task v211Jar(type: Jar, dependsOn: v211Classes) {
-  baseName = "${project.archivesBaseName}_2.11"
-  from sourceSets.v211.output
+task v210Jar(type: Jar, dependsOn: v210Classes) {
+  baseName = "${project.archivesBaseName}_2.10"
+  from sourceSets.v210.output
 }
 
 artifacts {
-  v211 v211Jar
+  v210 v210Jar
 }
 
 if (!hasProperty('scalaVersion')) {
@@ -61,15 +61,14 @@ repositories {
 
 dependencies {
   commonCompile "com.foursquare:common-thrift-bson:2.+"
-//  commonCompile "com.twitter:scrooge-core_2.10:${scroogeVersion}" // chane after we have 2.11 version
 
   compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
   compile "org.mongodb:casbah_${scalaLevel}:2.+"
   compile "org.scala-lang:scala-library:${scalaVersion}"
 
-  v211Compile "com.twitter:scrooge-serializer_2.11:${scroogeVersion}"
-  v211Compile "org.mongodb:casbah_2.11:2.+"
-  v211Compile "org.scala-lang:scala-library:${scala211Version}"
+  v210Compile "com.twitter:scrooge-serializer_2.10:${scroogeVersion}"
+  v210Compile "org.mongodb:casbah_2.10:2.+"
+  v210Compile "org.scala-lang:scala-library:${scala211Version}"
 
   testCompile "junit:junit:4.+"
   testCompile "org.scalatest:scalatest_${scalaLevel}:2.+"
@@ -77,13 +76,12 @@ dependencies {
 
 configurations {
   compile.extendsFrom(commonCompile)
-  v211Compile.extendsFrom(commonCompile)
-  v211.extendsFrom(v211Compile)
+  v210Compile.extendsFrom(commonCompile)
+  v210.extendsFrom(v210Compile)
 }
 
-compileV211Scala {
+compileV210Scala {
   scalaCompileOptions.fork = true
-  scalaCompileOptions.forkOptions.jvmArgs = ['-XX:MaxPermSize=512m']
 }
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
