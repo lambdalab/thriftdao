@@ -42,11 +42,15 @@ artifacts {
 }
 
 if (!hasProperty('scalaVersion')) {
-  ext.scalaVersion = '2.10.4'
+  ext.scalaVersion = '2.11.7'
+}
+if (!hasProperty('scala210Version')) {
+  ext.scala210Version = '2.10.6'
 }
 if (!hasProperty('scroogeVersion')) {
   ext.scroogeVersion = "3.17.0"
 }
+
 def (major, minor, trivial) = scalaVersion.tokenize('.')
 ext.scalaLevel = major + "." + minor
 
@@ -68,7 +72,7 @@ dependencies {
 
   v210Compile "com.twitter:scrooge-serializer_2.10:${scroogeVersion}"
   v210Compile "org.mongodb:casbah_2.10:2.+"
-  v210Compile "org.scala-lang:scala-library:${scala211Version}"
+  v210Compile "org.scala-lang:scala-library:${scala210Version}"
 
   testCompile "junit:junit:4.+"
   testCompile "org.scalatest:scalatest_${scalaLevel}:2.+"
