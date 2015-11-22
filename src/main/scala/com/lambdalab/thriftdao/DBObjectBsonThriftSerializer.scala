@@ -4,6 +4,7 @@ import com.lambdalab.thriftdao.bson.LTBSONProtocol
 import com.mongodb.casbah.Imports._
 import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec, ThriftStructSerializer}
+import org.bson.BSONObject
 
 import scala.collection.mutable
 
@@ -26,8 +27,9 @@ trait DBObjectBsonThriftSerializer[T <: ThriftStruct] {
     def codec = DBObjectBsonThriftSerializer.this.codec
   }
 
-  def fromDBObject(obj: DBObject): T = {
-    val bytes = bsonEncoder.encode(obj - "_id")
+  def fromDBObject(obj: BSONObject): T = {
+    obj.removeField("_id")
+    val bytes = bsonEncoder.encode(obj)
     deserializer.fromBytes(bytes)
   }
 
