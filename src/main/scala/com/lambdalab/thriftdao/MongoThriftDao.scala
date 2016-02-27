@@ -149,27 +149,27 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       withId(toDBObject(getList(assocs)))
     }
 
-    def find() = {
+    def find(): Iterator[T] = {
       tracer.withTracer("[select] find") {
         coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
       }
     }
 
-    def find(pageNumber: Int, nPerPage: Int) = {
+    def find(pageNumber: Int, nPerPage: Int): Iterator[T] = {
       tracer.withTracer("[select] find page %d" format pageNumber) {
         val skipped = if (pageNumber > 0) (pageNumber - 1) * nPerPage else 0
         coll.find(dbo).skip(skipped).limit(nPerPage).map(dbo => fromDBObjectWithId(dbo))
       }
     }
 
-    def find(keys: FieldFilter*) = {
+    def find(keys: FieldFilter*): Iterator[T] = {
       tracer.withTracer("[select] find with filter") {
         val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
         coll.find(dbo, filter).map(dbo => fromDBObjectWithId(dbo))
       }
     }
 
-    def findOne() = {
+    def findOne(): Option[T] = {
       tracer.withTracer("[select] find one") {
         coll.findOne(dbo).map(dbo => fromDBObjectWithId(dbo))
       }
