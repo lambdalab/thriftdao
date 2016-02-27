@@ -128,11 +128,11 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     FieldSelector(assoc._1) -> assoc._2
   }
 
-  def select(assoc: (TField, Any)) = {
+  def select(assoc: (TField, Any)): Select = {
     Select(convertAssoc(assoc))
   }
 
-  def select(assocs: FieldAssoc*) = {
+  def select(assocs: FieldAssoc*): Select = {
     Select(assocs: _*)
   }
 
