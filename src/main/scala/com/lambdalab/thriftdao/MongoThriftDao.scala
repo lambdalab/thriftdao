@@ -23,7 +23,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       coll.name + "-" + indexName + "-index", unique)
   }
 
-  private val primaryKey = DBObject(primaryFields.map(f => f.toDBKey -> 1))
+  private val primaryKey: DBObject = DBObject(primaryFields.map(f => f.toDBKey -> 1))
 
 //  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
 //    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
