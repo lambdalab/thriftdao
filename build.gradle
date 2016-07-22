@@ -70,7 +70,7 @@ dependencies {
   compile "org.mongodb:casbah_${scalaLevel}:2.+"
   compile "org.scala-lang:scala-library:${scalaVersion}"
 
-  v210Compile "com.twitter:scrooge-serializer_2.10:${scroogeVersion}"
+  v210Compile "com.twitter:scrooge-serializer_2.10:4.7.0"
   v210Compile "org.mongodb:casbah_2.10:2.+"
   v210Compile "org.scala-lang:scala-library:${scala210Version}"
 
