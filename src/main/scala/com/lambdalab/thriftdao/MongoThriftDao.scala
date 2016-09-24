@@ -197,7 +197,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       update(set = Nil, inc = assocs)
     }
 
-    def update(set: Traversable[FieldAssoc], inc: Traversable[FieldAssoc]) = {
+    def update(set: Traversable[FieldAssoc], inc: Traversable[FieldAssoc], upsert: Boolean = false) = {
       tracer.withTracer("[select] update") {
         val query = dbo
         val setObj = withId(toDBObject(getList(set)))
@@ -206,7 +206,13 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
           if (incObj.isEmpty) DBObject("$set" -> setObj)
           else DBObject("$set" -> setObj, "$inc" -> incObj)
         }
-        coll.update(query, updateObj, upsert = false, multi = true)
+        coll.update(query, updateObj, upsert = upsert, multi = true)
+      }
+    }
+
+    def upsert(newValue: T) = {
+      tracer.withTracer("[select] update") {
+        coll.update(dbo, toDBObjectWithId(newValue), upsert = true, multi = true)
       }
     }
   }
