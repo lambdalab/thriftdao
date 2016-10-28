@@ -181,6 +181,12 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       }
     }
 
+    def count(): Int = {
+      tracer.withTracer("[select] count") {
+        coll.count(dbo)
+      }
+    }
+
     def remove() = {
       tracer.withTracer("[select] remove") {
         coll.remove(dbo)
