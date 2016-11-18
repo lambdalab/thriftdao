@@ -9,8 +9,12 @@ import scala.util.matching.Regex
 trait DBObjectHelper {
   protected def toDBObject(condition: Traversable[(List[TField], Any)]): DBObject = {
     DBObject(condition.map(kv =>
-      toDBObjectValue(kv._1, kv._2)
-    ).toList)
+        kv._2 match {
+          case None => None
+          case Some(v) => Some(toDBObjectValue(kv._1, v))
+          case _ => Some(toDBObjectValue(kv._1, kv._2))
+        }
+    ).toList.flatten)
   }
 
   /*
