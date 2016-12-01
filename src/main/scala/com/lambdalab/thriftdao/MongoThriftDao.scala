@@ -84,7 +84,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def insert(objs: Seq[T]): WriteResult = {
     tracer.withTracer("insert") {
       val dbos = objs.map(toDBObjectWithId)
-      coll.insert(dbos: _*)(x => x, concern = WriteConcern.Normal.continueOnError(true)) // TODO, investigate why implicit doesn't work
+      coll.insert(dbos: _*)(x => x, concern = WriteConcern.Safe.continueOnError(true)) // TODO, investigate why implicit doesn't work
     }
   }
 
