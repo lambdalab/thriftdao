@@ -9,7 +9,8 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   protected def coll: MongoCollection
   protected def primaryFields: List[FieldSelector]
   protected def codec: C
-  protected def tracer: DbTracer
+  def tracer: DbTracer
+  def name = coll.name
 
   def ensureIndex(indexName: String, unique: Boolean, fields: List[TField]): Unit = {
     coll.ensureIndex(
