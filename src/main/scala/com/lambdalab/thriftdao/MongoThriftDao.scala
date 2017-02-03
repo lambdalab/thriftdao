@@ -82,10 +82,16 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
   }
 
-  def insert(objs: Seq[T]): WriteResult = {
+  def insert(objs: Seq[T]): Unit = {
     tracer.withTracer("insert") {
       val dbos = objs.map(toDBObjectWithId)
-      coll.insert(dbos: _*)(x => x, concern = WriteConcern.Safe.continueOnError(true)) // TODO, investigate why implicit doesn't work
+      try {
+        coll.insert(dbos: _*)(x => x, concern = WriteConcern.Safe.continueOnError(true)) // TODO, investigate why implicit doesn't work
+      } catch {
+        case e: com.mongodb.WriteConcernException =>
+          println(e)
+      }
+
     }
   }
 

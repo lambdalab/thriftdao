@@ -40,4 +40,16 @@ class QueryIntegrateSuite extends FunSuite {
       assert(dao.findOne(SimpleStruct.StrField -> "y") == Some(SimpleStruct("y")))
     }
   }
+
+  test("should ingore duplicate key error") {
+    if (db != null) {
+      val n = SimpleStruct("x", Some("y"), Some(1))
+      val n2 = SimpleStruct("x", Some("y"), Some(2))
+
+      dao.removeAll()
+      dao.insert(Seq(n))
+      dao.insert(Seq(n, n2))
+      assert(dao.findAll().size == 2)
+    }
+  }
 }
