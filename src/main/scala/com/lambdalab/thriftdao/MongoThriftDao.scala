@@ -12,16 +12,30 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def tracer: DbTracer
   def name = coll.name
 
+  private def checkIndexExists(indexName: String): Boolean = {
+    val realIndexName = coll.name + "-" + indexName + "-index"
+    for (info <- coll.indexInfo) {
+      if (realIndexName.equals(info.get("name"))) {
+        return true
+      }
+    }
+    false
+  }
+
   def ensureIndex(indexName: String, unique: Boolean, fields: List[TField]): Unit = {
-    coll.ensureIndex(
-      DBObject(fields.map(field => field.id.toString -> 1)),
-      coll.name + "-" + indexName + "-index", unique)
+    if (!checkIndexExists(indexName)) {
+      coll.ensureIndex(
+        DBObject(fields.map(field => field.id.toString -> 1)),
+        coll.name + "-" + indexName + "-index", unique)
+    }
   }
 
   def ensureIndexNested(indexName: String, unique: Boolean, nfields: List[List[TField]]): Unit = {
-    coll.ensureIndex(
-      DBObject(nfields.map(fields => toLabel(fields) -> 1)),
-      coll.name + "-" + indexName + "-index", unique)
+    if (!checkIndexExists(indexName)) {
+      coll.ensureIndex(
+        DBObject(nfields.map(fields => toLabel(fields) -> 1)),
+        coll.name + "-" + indexName + "-index", unique)
+    }
   }
 
   private val primaryKey: DBObject = DBObject(primaryFields.map(f => f.toDBKey -> 1))
