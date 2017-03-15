@@ -40,18 +40,22 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   private val primaryKey: DBObject = DBObject(primaryFields.map(f => f.toDBKey -> 1))
 
-//  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
-//    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
-//  }
+  //  if (primaryKey.size > 1) { // If it == 1, we'll map it to _id and it get indexed automatically
+  //    coll.ensureIndex(primaryKey, coll.name + "-primiary-index", true)
+  //  }
 
   private def withId(dbo: DBObject): DBObject = {
     if (primaryKey.size == 1) {
       val k = primaryFields(0).toDBKey
-      if (dbo.contains(k)) {
-        val v = dbo(k)
-        dbo -= k
-        dbo += "_id" -> v
-      }
+      val newObject = DBObject()
+      dbo.keys.foreach(key => {
+        val v = dbo(key)
+        key.span(_ != '.') match {
+          case (first , rest) if first == k => newObject += s"_id${rest}" -> v
+          case _ => newObject += key -> v
+        }
+      })
+      newObject
     } else if (primaryFields.size > 0) {
       val pValues: Traversable[AnyRef] = primaryFields.map { f =>
         val k = f.toDBKey
@@ -64,8 +68,10 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
         val key = java.security.MessageDigest.getInstance("MD5").digest(str.getBytes("UTF-8")).take(12)
         dbo += "_id" -> new ObjectId(key)
       }
+      dbo
+    } else {
+      dbo
     }
-    dbo
   }
 
   private def toDBObjectWithId(t: T) = {
@@ -173,6 +179,20 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     def find(): Iterator[T] = {
       tracer.withTracer("[select] find") {
         coll.find(dbo).map(dbo => fromDBObjectWithId(dbo))
+      }
+    }
+
+    def findAndSortBy(limit: Int , sortBy: (FieldSelector,Int)*): Iterator[T] ={
+      tracer.withTracer("[select] findAndSortBy") {
+        var query = coll.find(dbo)
+        if(limit >=0) {
+          query = query.limit(limit)
+        }
+        if(sortBy.nonEmpty) {
+          val sorts = DBObject(sortBy.map(p => p._1.toDBKey -> p._2).toList)
+          query = query.sort(sorts)
+        }
+        query.map(dbo => fromDBObjectWithId(dbo))
       }
     }
 
