@@ -1,5 +1,6 @@
 package com.lambdalab.thriftdao
 
+import com.mongodb.InsertOptions
 import com.mongodb.casbah.Imports._
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec}
 import org.apache.thrift.protocol._
@@ -13,7 +14,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def name = coll.name
 
   private def checkIndexExists(indexName: String): Boolean = {
-    val realIndexName = coll.name + "-" + indexName + "-index"
+    val realIndexName = name + "-" + indexName + "-index"
     for (info <- coll.indexInfo) {
       if (realIndexName.equals(info.get("name"))) {
         return true
@@ -24,7 +25,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   def ensureIndex(indexName: String, unique: Boolean, fields: List[TField]): Unit = {
     if (!checkIndexExists(indexName)) {
-      coll.ensureIndex(
+      coll.createIndex(
         DBObject(fields.map(field => field.id.toString -> 1)),
         coll.name + "-" + indexName + "-index", unique)
     }
@@ -32,7 +33,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
 
   def ensureIndexNested(indexName: String, unique: Boolean, nfields: List[List[TField]]): Unit = {
     if (!checkIndexExists(indexName)) {
-      coll.ensureIndex(
+      coll.createIndex(
         DBObject(nfields.map(fields => toLabel(fields) -> 1)),
         coll.name + "-" + indexName + "-index", unique)
     }
@@ -106,7 +107,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     tracer.withTracer("insert") {
       val dbos = objs.map(toDBObjectWithId)
       try {
-        coll.insert(dbos: _*)(x => x, concern = WriteConcern.Safe.continueOnError(true)) // TODO, investigate why implicit doesn't work
+        coll.insert(new InsertOptions().writeConcern(WriteConcern.Safe).continueOnError(true), dbos: _*) // TODO, investigate why implicit doesn't work
       } catch {
         case e: com.mongodb.WriteConcernException =>
           println(e)

@@ -1,8 +1,7 @@
 package com.lambdalab.thriftdao
 
 import com.lambdalab.thriftdao.bson.LTBSONProtocol
-import com.mongodb.casbah.Imports._
-import com.mongodb.{DefaultDBDecoder, DefaultDBEncoder}
+import com.mongodb.{DBObject, DefaultDBDecoder, DefaultDBEncoder}
 import com.twitter.scrooge.{ThriftStruct, ThriftStructCodec, ThriftStructSerializer}
 import org.bson.BSONObject
 

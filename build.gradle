@@ -67,7 +67,7 @@ dependencies {
   commonCompile "com.foursquare:common-thrift-bson:2.+"
 
   compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
-  compile "org.mongodb:casbah_${scalaLevel}:2.+"
+  compile "org.mongodb:casbah_${scalaLevel}:3.1.1"
   compile "org.scala-lang:scala-library:${scalaVersion}"
 
   v210Compile "com.twitter:scrooge-serializer_2.10:4.7.0"
