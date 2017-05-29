@@ -42,13 +42,13 @@ artifacts {
 }
 
 if (!hasProperty('scalaVersion')) {
-  ext.scalaVersion = '2.11.7'
+  ext.scalaVersion = '2.11.11'
 }
 if (!hasProperty('scala210Version')) {
   ext.scala210Version = '2.10.6'
 }
 if (!hasProperty('scroogeVersion')) {
-  ext.scroogeVersion = "4.7.0"
+  ext.scroogeVersion = "4.16.0"
 }
 
 def (major, minor, trivial) = scalaVersion.tokenize('.')
