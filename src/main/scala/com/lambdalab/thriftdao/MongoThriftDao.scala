@@ -34,7 +34,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   def ensureIndexNested(indexName: String, unique: Boolean, nfields: List[List[TField]]): Unit = {
     if (!checkIndexExists(indexName)) {
       coll.createIndex(
-        DBObject(nfields.map(fields => toLabel(fields) -> 1)),
+        withId(DBObject(nfields.map(fields => toLabel(fields) -> 1))),
         coll.name + "-" + indexName + "-index", unique)
     }
   }
