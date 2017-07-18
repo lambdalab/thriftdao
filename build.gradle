@@ -7,9 +7,8 @@ buildscript {
   }
 
   dependencies {
-    classpath "com.github.iamsteveholmes:scrooge-gradle-plugin:+"
+    classpath 'com.yodle.griddle:griddle:1.9'
     classpath "org.scala-lang:scala-library:2.10.6"
-    classpath "com.twitter:scrooge-generator_2.10:4.+"
     classpath 'org.apache.thrift:libthrift:0.9.2'
   }
 }
@@ -55,8 +54,8 @@ def (major, minor, trivial) = scalaVersion.tokenize('.')
 ext.scalaLevel = major + "." + minor
 
 apply {
-  plugin "scrooge-gradle-plugin"
   plugin "scala"
+  plugin "scrooge"
 }
 
 repositories {
@@ -64,6 +63,8 @@ repositories {
 }
 
 dependencies {
+  scroogeGen "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
+
   commonCompile "com.foursquare:common-thrift-bson:2.+"
 
   compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
@@ -90,8 +91,6 @@ compileV210Scala {
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
 
-compileScrooge {
-  thriftFiles = fileTree(dir: "src/test/thrift", include: "**/*.thrift")
-  dest = file("gen/test/scala")
-}
-tasks.compileTestScala.dependsOn(compileScrooge)
+thriftSrcDir = "src/test/thrift"
+thriftGenDir = "gen/test/scala"
+tasks.compileTestScala.dependsOn(generateInterfaces)
