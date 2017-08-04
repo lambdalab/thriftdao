@@ -15,31 +15,6 @@ buildscript {
 
 apply plugin: "scala"
 
-sourceSets {
-  v210 {
-    scala {
-      srcDirs = ['src/main/scala']
-    }
-    java {
-      srcDirs = ['src/main/java']
-    }
-  }
-}
-
-configurations {
-  commonCompile
-  v210
-}
-
-task v210Jar(type: Jar, dependsOn: v210Classes) {
-  baseName = "${project.archivesBaseName}_2.10"
-  from sourceSets.v210.output
-}
-
-artifacts {
-  v210 v210Jar
-}
-
 if (!hasProperty('scalaVersion')) {
   ext.scalaVersion = '2.11.11'
 }
@@ -65,28 +40,13 @@ repositories {
 dependencies {
   scroogeGen "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
 
-  commonCompile "com.foursquare:common-thrift-bson:2.+"
-
+  compile "com.foursquare:common-thrift-bson:2.+"
   compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
   compile "org.mongodb:casbah_${scalaLevel}:3.1.1"
   compile "org.scala-lang:scala-library:${scalaVersion}"
 
-  v210Compile "com.twitter:scrooge-serializer_2.10:4.7.0"
-  v210Compile "org.mongodb:casbah_2.10:2.+"
-  v210Compile "org.scala-lang:scala-library:${scala210Version}"
-
   testCompile "junit:junit:4.+"
   testCompile "org.scalatest:scalatest_${scalaLevel}:2.+"
-}
-
-configurations {
-  compile.extendsFrom(commonCompile)
-  v210Compile.extendsFrom(commonCompile)
-  v210.extendsFrom(v210Compile)
-}
-
-compileV210Scala {
-//  scalaCompileOptions.fork = true
 }
 
 sourceSets.test.scala.srcDirs += ["gen/test/scala"]
