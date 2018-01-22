@@ -21,8 +21,8 @@ if (!hasProperty('scalaVersion')) {
 if (!hasProperty('scala210Version')) {
   ext.scala210Version = '2.10.6'
 }
-if (!hasProperty('scroogeVersion')) {
-  ext.scroogeVersion = "4.16.0"
+if (!hasProperty('finagleVersion')) {
+  ext.finagleVersion = "17.12.0"
 }
 
 def (major, minor, trivial) = scalaVersion.tokenize('.')
@@ -38,10 +38,10 @@ repositories {
 }
 
 dependencies {
-  scroogeGen "com.twitter:scrooge-generator_${scalaLevel}:${scroogeVersion}"
+  scroogeGen "com.twitter:scrooge-generator_${scalaLevel}:${finagleVersion}"
 
   compile "com.foursquare:common-thrift-bson:2.+"
-  compile "com.twitter:scrooge-serializer_${scalaLevel}:${scroogeVersion}"
+  compile "com.twitter:scrooge-serializer_${scalaLevel}:${finagleVersion}"
   compile "org.mongodb:casbah_${scalaLevel}:3.1.1"
   compile "org.scala-lang:scala-library:${scalaVersion}"
 
