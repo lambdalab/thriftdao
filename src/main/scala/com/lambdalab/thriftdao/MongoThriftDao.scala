@@ -7,10 +7,15 @@ import org.apache.thrift.protocol._
 
 trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObjectHelper {
   protected def serializer: DBObjectBsonThriftSerializer[T]
+
   protected def coll: MongoCollection
+
   protected def primaryFields: List[FieldSelector]
+
   protected def codec: C
+
   def tracer: DbTracer
+
   def name = coll.name
 
   private def checkIndexExists(indexName: String): Boolean = {
@@ -52,7 +57,7 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       dbo.keys.foreach(key => {
         val v = dbo(key)
         key.span(_ != '.') match {
-          case (first , rest) if first == k => newObject += s"_id${rest}" -> v
+          case (first, rest) if first == k => newObject += s"_id${rest}" -> v
           case _ => newObject += key -> v
         }
       })
@@ -143,11 +148,11 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
   }
 
   def find(condition: (TField, Any)*): Iterator[T] = {
-    select(condition.map(convertAssoc) : _*).find()
+    select(condition.map(convertAssoc): _*).find()
   }
 
   def findOne(condition: (TField, Any)*): Option[T] = {
-    select(condition.map(convertAssoc) : _*).findOne()
+    select(condition.map(convertAssoc): _*).findOne()
   }
 
   //////////////////////// New API
@@ -183,13 +188,13 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       }
     }
 
-    def findAndSortBy(limit: Int , sortBy: (FieldSelector,Int)*): Iterator[T] ={
+    def findAndSortBy(limit: Int, sortBy: (FieldSelector, Int)*): Iterator[T] = {
       tracer.withTracer("[select] findAndSortBy") {
         var query = coll.find(dbo)
-        if(limit >=0) {
+        if (limit >= 0) {
           query = query.limit(limit)
         }
-        if(sortBy.nonEmpty) {
+        if (sortBy.nonEmpty) {
           val sorts = DBObject(sortBy.map(p => p._1.toDBKey -> p._2).toList)
           query = query.sort(sorts)
         }
@@ -208,6 +213,14 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       tracer.withTracer("[select] find with filter") {
         val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
         coll.find(dbo, filter).map(dbo => fromDBObjectWithId(dbo))
+      }
+    }
+
+    def find(pageNumber: Int, nPerPage: Int, keys: FieldFilter*): Iterator[T] = {
+      tracer.withTracer("[select] find with filter") {
+        val filter = DBObject(keys.map(p => p._1.toDBKey -> p._2).toList)
+        val skipped = if (pageNumber > 0) (pageNumber - 1) * nPerPage else 0
+        coll.find(dbo, filter).skip(skipped).limit(nPerPage).map(dbo => fromDBObjectWithId(dbo))
       }
     }
 
@@ -236,11 +249,13 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
     }
 
     def set(assoc: (TField, Any)): Unit = set(convertAssoc(assoc))
+
     def set(assocs: FieldAssoc*): Unit = {
       update(set = assocs, inc = Nil)
     }
 
     def inc(assoc: (TField, Any)): Unit = inc(convertAssoc(assoc))
+
     def inc(assocs: FieldAssoc*): Unit = {
       update(set = Nil, inc = assocs)
     }
@@ -264,4 +279,5 @@ trait MongoThriftDao[T <: ThriftStruct, C <: ThriftStructCodec[T]] extends DBObj
       }
     }
   }
+
 }
